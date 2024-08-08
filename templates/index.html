@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Auth</title>
+</head>
+<body>
+    <h1>Welcome to DJ Auth</h1>
+    {% if request.user.is_authenticated %} 
+        <p>Logged in User: <b>{{ request.user }}</b></p>
+        <p>edit ur profile here -- <a href="{% url 'account-edit-page' request.user.id %}">⚙</a></p>
+    {% else %} 
+        <p>Logged in User: <b>No One</b></p>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message|safe }}</p>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

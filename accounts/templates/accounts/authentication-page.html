@@ -1,0 +1,83 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Creation</title>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message|safe }}</p>
+        {% endfor %}
+    {% endif %}
+    <div class="">
+        <!-- Login Form -->
+        {% if action == "sigin" %}
+            <h2 class="">Log in to DJ AUTH</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="">
+                    <label>Email</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <p class="">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="">
+                    <label>Password</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <p class="">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div><label>
+                    <input type="checkbox" name="" id="">
+                    <span>Remeber Me</span>
+                </label></div>
+                <button type="submit">LOGIN</button>
+            </form>
+            <a href="{% url 'password-reset' %}">Forgot Password?</a>
+            <p>New to DJ AUTH? <a href="{% url 'signup-page' %}">Create an account</a></p>
+        <!-- Password Reset Form -->
+        {% elif action == "reset" %}
+            <h2>Forgot your password?</h2>
+            <p>Please enter the email address, we will send ou instrucations to reset your password.</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="">
+                    <label>Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p class="">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="">
+                    {{ form.captcha }}
+                    {% if form.captcha.errors %}
+                        {% for error in form.captcha.errors %}
+                            <p class="">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <button type="submit">Request reset link</button>
+            </form>
+        <!-- Set Password form -->
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_div }}
+                <button type="submit">Submit</button>
+            </form>           
+        {% endif %}
+    </div>
+</body>
+</html>

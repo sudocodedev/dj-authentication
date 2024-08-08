@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message|safe }}</p>
+        {% endfor %}
+    {% endif %}
+    {% if action != "resend" %}
+        <h1>Verify OTP</h1>
+        <form action="" method="post">
+            {% csrf_token %}
+            <label>OTP</label>
+            <input name="otp_code" type="text" placeholder="Enter OTP (4 digits from MAIL + 4 digits from SMS)"/>
+            <button type="submit">Activate Account</button>        
+        </form>
+
+        <p>Need a new OTP? <a href="">Resend OTP</a></p>
+    {% else %}
+        <h1>Resend OTP</h1>
+        <form action="" method="post">
+            {% csrf_token %}
+            <label>Email</label>
+            <input name="email" type="email" placeholder="Enter mail address"/>
+            <label>Phone Number</label>
+            <input name="phonenumber" type="tel" placeholder="Enter phone number eg. 9876543210"/>
+            <button type="submit">Send OTP</button>        
+        </form>
+    {% endif %}
+</body>
+</html>

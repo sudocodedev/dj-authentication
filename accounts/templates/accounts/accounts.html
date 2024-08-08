@@ -1,0 +1,183 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Update</title>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message|safe }}</p>
+        {% endfor %}
+    {% endif %}
+    <div class="">
+        {% if action == 'edit' %}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="profile-pic-container">
+                    {{ form.avatar }}
+                    <label for="id_avatar">
+                        <img src="{% static 'assets/camera.svg' %}"/>
+                    </label>
+                    {% if form.avatar.errors %}
+                        {% for error in form.avatar.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>User Name</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        {% for error in form.first_name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        {% for error in form.last_name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Phone</label>
+                    {{ form.phonenumber }}
+                    {% if form.phonenumber.errors %}
+                        {% for error in form.phonenumber.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <button type="submit">Submit</button>
+            </form>
+        {% else %}
+            <h2>Create your account</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="profile-pic-container">
+                    {{ form.avatar }}
+                    <label for="id_avatar">
+                        <img src="{% static 'assets/camera.svg' %}"/>
+                    </label>
+                    {% if form.avatar.errors %}
+                        {% for error in form.avatar.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>User Name</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        {% for error in form.first_name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        {% for error in form.last_name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Phone</label>
+                    {{ form.phonenumber }}
+                    {% if form.phonenumber.errors %}
+                        {% for error in form.phonenumber.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        {% for error in form.password1.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="">
+                    <label>Reconfirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        {% for error in form.password2.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div><label>
+                    <input type="checkbox" name="" id=""/>
+                    <span>I agree to receive email communication & promotions from DJ CRUD</span>
+                </label></div>
+                <button type="submit">Register</button>
+                <p>By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+            </form>
+
+            <p>Already got an account? <a href="sigin-page">log in here</a></p>
+        {% endif %}
+    </div>
+</body>
+</html>
