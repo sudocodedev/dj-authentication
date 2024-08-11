@@ -1,23 +1,36 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>DJ Auth</title>
 </head>
 <body>
-    <h1>Welcome to DJ Auth</h1>
-    {% if request.user.is_authenticated %} 
-        <p>Logged in User: <b>{{ request.user }}</b></p>
-        <p>edit ur profile here -- <a href="{% url 'account-edit-page' request.user.id %}">⚙</a></p>
-    {% else %} 
-        <p>Logged in User: <b>No One</b></p>
-    {% endif %}
-
+    <!-- Alerts, messages -->
+    <div class="messages">
     {% if messages %}
         {% for message in messages %}
             <p>{{ message|safe }}</p>
         {% endfor %}
-    {% endif %}
+    {% endif %}    
+    </div>
+
+    <!-- Navbar -->
+
+    <!-- End Navbar -->
+
+    <!-- Main section -->
+    <div class="content">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+    <!-- End Main -->
+
+    <!-- Footer -->
+
+    <!-- End Footer -->
 </body>
 </html>

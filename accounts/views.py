@@ -13,8 +13,13 @@ from . import helper
 from .token import account_activation_token
 from threading import Thread
 from django.contrib.sites.shortcuts import get_current_site
+import secrets
+
 
 User = get_user_model() # custom user model
+
+
+######################## LOGIN ########################
 
 def user_signin(request):
     if request.method == 'POST':
@@ -24,11 +29,32 @@ def user_signin(request):
             password = form.cleaned_data.get('password')
 
             user = authenticate(request, username=email, password=password)
-            
+
+
             if user:
-                login(request, user)
-                messages.success(request, _("<b>You have just logged in</b>"))
-                return redirect('home-page')
+                if User.objects.get(email=email).login_sms_otp:
+                    # Enabled Login OTP via SMS
+                    account = User.objects.get(email=email)
+                    otp = OTP.objects.create(
+                                             user=account, 
+                                             token=secrets.randbits(16),
+                                             otp_expires_at = timezone.now() + timezone.timedelta(minutes=5)
+                                            )
+                    # fetching User data
+                    uid = urlsafe_base64_encode(force_bytes(account.id))                
+                    data = {
+                        'phonenumber': account.phonenumber,
+                        'otp': otp.token,
+                    }
+                    # Sending OTP
+                    send_login_otp = Thread(target=helper.login_sms_otp, args=(request, data))
+                    send_login_otp.start()
+                    return redirect("verify-login-otp", uid)
+                else:
+                    # Default Login
+                    login(request, user)
+                    messages.success(request, _("User logged in"))
+                    return redirect('home-page')
             else:
                 messages.error(request, _("user credentials are not correct"))
     else:
@@ -37,10 +63,57 @@ def user_signin(request):
     context = { 'form': form, 'action': 'sigin' }
     return render(request, 'accounts/authentication-page.html', context)
 
+def verify_login_otp(request, uidb64):
+    uid = force_str(urlsafe_base64_decode(uidb64))
+    user = User.objects.get(id=uid)
+    db_otp = OTP.objects.filter(user=user).last()
+    print(f"DB OTP: {db_otp.token} | entered OTP: {request.POST.get('otp_code')}")
+
+    if request.method == "POST":
+        if request.POST.get('otp_code') == db_otp.token:
+            if db_otp.otp_expires_at > timezone.now():
+                login(request, user)
+                messages.success(request, _("User logged in"))
+                return redirect('home-page')
+            else:
+                messages.error(request, _("OTP got expired, Get a new one"))
+                return redirect("verify-login-otp", uidb64)
+        else:
+            messages.error(request, _("Invalid OTP, Enter a valid one"))
+            return redirect("verify-login-otp", uidb64)
+    
+    return render(request, 'accounts/verify_account.html', {'action': 'login', 'id': uidb64})
+
+
+def resend_login_sms_otp(request, uidb64):
+    uid = force_str(urlsafe_base64_decode(uidb64))
+    account = User.objects.get(id=uid)
+    otp = OTP.objects.create(
+                                user=account, 
+                                token=secrets.randbits(16),
+                                otp_expires_at = timezone.now() + timezone.timedelta(minutes=5)
+                            )
+    # fetching User data                
+    data = {
+        'phonenumber': account.phonenumber,
+        'otp': otp.token,
+    }
+    # Sending OTP
+    send_login_otp = Thread(target=helper.login_sms_otp, args=(request, data))
+    send_login_otp.start()
+    return redirect("verify-login-otp", uidb64)
+
+
 def user_signout(request):
     logout(request)
-    messages.info(request, _("<b>You have just logged out</b>"))
+    messages.info(request, _("User logged out"))
     return redirect('home-page')
+
+
+######################## END LOGIN ########################
+
+
+######################## SIGN UP ########################
 
 def user_signup(request):
     if request.method == 'POST':
@@ -120,6 +193,10 @@ def resend_otp(request):
     context={'action': 'resend',}
     return render(request, 'accounts/verify_account.html', context)
 
+######################## END SIGN UP ########################
+
+
+######################## FORGOT Password ########################
 
 def password_reset(request):
     if request.method == "POST":
@@ -142,6 +219,7 @@ def password_reset(request):
 
             return redirect('password-reset')
         else:
+            # for rendering form field errors
             return render(request, 'accounts/authentication-page.html', {'form': form, 'action': 'reset'})
     else:
         form = AccountPwdResetForm()
@@ -175,9 +253,49 @@ def password_reset_request(request, uidb64, token):
     else:
         messages.error(request, _("Password Reset verification link has been expired, redirecting to Password Reset page"))
         return redirect('password-reset')
-    
+
+######################## END FORGOT Password ########################
+
+
+######################## User Reset Password ########################
+
+def account_reset_password(request, accountID):
+    user = User.objects.get(id=accountID)
+    if request.method == "POST":
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            user.refresh_from_db()
+            user.save()
+            messages.success(request, _('Password changed successfully!'))
+            return redirect('account-view-page',user.id)
+        
+    form = SetPasswordForm(user)
+    context = {'action': 'setpwd', 'form': form}
+    return render(request, 'accounts/authentication-page.html', context)
+
+
+######################## END User Reset Password ########################
+
+
+######################## PROFILE ########################
+
+def account_view(request, accountID):
+    try:
+        account = User.objects.get(id=accountID)
+    except User.DoesNotExist:
+        messages.error(request, _("User doesn't exist, redirecting to home page"))
+        return redirect('home-page')
+    return render(request, 'accounts/view-account.html', {'account':account})         
+
 
 def account_edit(request, accountID):
+    try:
+        account = User.objects.get(id=accountID)
+    except User.DoesNotExist:
+        messages.error(request, _("User doesn't exist, redirecting to home page"))
+        return redirect('home-page')
+    
     if request.method == 'POST':
         form = AccountEditForm(request.POST, instance = request.user)
         
@@ -195,3 +313,5 @@ def account_edit(request, accountID):
 
     context = {'form': form, 'action': 'edit'}
     return render(request, 'accounts/accounts.html', context)
+
+######################## END PROFILE ########################

@@ -6,6 +6,37 @@ import requests
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
+def login_sms_otp(request, kwargs):
+    API_KEY = os.environ.get('SMS_CHEF_API_KEY')
+
+    phone_number = kwargs.get('phone')
+
+    body = f"""
+    𝐃𝐉 𝐂𝐑𝐔𝐃
+
+    Hi,
+
+    Your login OTP is {kwargs.get('otp')}.
+    Do not share with anyone.
+    Above OTP will expiry in 5 mins.
+    """
+
+    message = {
+        "secret": API_KEY,
+        "mode": "devices",
+        "device": os.environ.get("SMS_CHEF_DEVICE_ID"),
+        "sim": 1,
+        "priority": 1,
+        "phone": phone_number,
+        "message": body,
+    }
+
+    r = requests.post(url=os.environ.get("SMS_CHEF_URL"), params=message)
+
+    if r.status_code == 200: 
+        messages.success(request, _(f"New OTP has been sent to your phonenumber <b>{phone_number}</b>"))
+    else:
+        messages.success(request, _(f"Problem in sending OTP to <b>{phone_number}</b>"))
 
 def send_otp_phone(request, kwargs):
     API_KEY = os.environ.get('SMS_CHEF_API_KEY')
@@ -19,7 +50,7 @@ def send_otp_phone(request, kwargs):
      
     You have received this message because you have initiated account verification process in our site.
 
-    Use the below OTP for account activation:
+    Use the below OTP for account activation and it is valid only for ** 5 mins **:
         {kwargs.get('otp')[4:]}
 
     Read the instructions sent over mail clearly.
@@ -42,7 +73,7 @@ def send_otp_phone(request, kwargs):
     r = requests.post(url=os.environ.get("SMS_CHEF_URL"), params=message)
 
     if r.status_code == 200: 
-        messages.success(request, _(f"OTP has been sent to your phonenumber <b>{phone_number}</b>"))
+        messages.success(request, _(f"New OTP has been sent to your phonenumber <b>{phone_number}</b>"))
     else:
         messages.success(request, _(f"Problem in sending OTP to <b>{phone_number}</b>"))
 

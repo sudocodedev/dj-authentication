@@ -1,0 +1,10 @@
+{% extends 'index.html' %}
+
+{% block content %}
+    <img src="{{ account.avatar.url }}" alt="profile-pic">
+    {{ account.username }}
+    {{ account.email }}
+    {{ account.phonenumber }}
+    {{ account.first_name }}
+    {{ account.last_name }}
+{% endblock %}

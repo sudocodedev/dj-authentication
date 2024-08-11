@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<h1>Welcome to DJ Auth</h1>
+    <i class='bx bx-user'></i>
+    <i class='bx bxs-user'></i>
+    <i class='bx bxl-facebook-square'></i>
+    {% if request.user.is_authenticated %} 
+        <p>Logged in User: <b>{{ request.user }}</b></p>
+        <p>view ur profile here -- <a href="{% url 'account-view-page' request.user.id %}">⚙</a></p>
+    {% else %} 
+        <p>Logged in User: <b>No One</b></p>
+    {% endif %}
+{% endblock %}

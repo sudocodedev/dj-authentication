@@ -29,19 +29,21 @@ class AccountCreationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('avatar', 'username', 'first_name', 'last_name', 'email', 'phonenumber')
+        fields = ('avatar', 'username', 'first_name', 'last_name', 'email', 'phonenumber','login_sms_otp')
         widgets = {
             'username': forms.TextInput(attrs={'placeholder': "Enter username"}),
             'email': forms.TextInput(attrs={'placeholder': "example@sample.com"}),
             'phonenumber': forms.TextInput(attrs={'placeholder': "9876543210"}),
             'first_name': forms.TextInput(attrs={'placeholder': "John"}),
             'last_name': forms.TextInput(attrs={'placeholder': "Cruse"}),
+            'login_sms_otp': forms.CheckboxInput(attrs={'checked': False})
         }
     
     def __init__(self, *args, **kwargs):
         super(AccountCreationForm, self).__init__(*args, **kwargs)
         self.fields['password1'].widget = forms.PasswordInput(attrs={'placeholder': "Type password"})
         self.fields['password2'].widget = forms.PasswordInput(attrs={'placeholder': "Re-type password"})
+        self.fields['avatar'].required = False
 
 
     def name_checker(self, s1:str) -> int:

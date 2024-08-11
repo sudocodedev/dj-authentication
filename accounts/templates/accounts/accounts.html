@@ -1,20 +1,16 @@
-{% load static %}
+{% extends 'index.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Update</title>
-</head>
-<body>
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message|safe }}</p>
-        {% endfor %}
-    {% endif %}
+{% block content %}
     <div class="">
         {% if action == 'edit' %}
+        <div class="">
+            <h2>Edit your account</h2>
+            <span>
+                
+            </span>
+        </div>
+        
+
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 
@@ -79,6 +75,11 @@
                         {% endfor %}
                     {% endif %}
                 </div>
+
+                <div class=""><label>
+                    {{ form.login_sms_otp }}
+                    <span>Enable SMS OTP to authenticate while you logging in everytime. <b>Recommeded!</b></span>
+                </label></div>
 
                 <button type="submit">Submit</button>
             </form>
@@ -149,6 +150,11 @@
                     {% endif %}
                 </div>
 
+                <div class=""><label>
+                    {{ form.login_sms_otp }}
+                    <span>Enable SMS OTP to authenticate while you logging in everytime. <b>Recommeded!</b></span>
+                </label></div>
+
                 <div class="">
                     <label>Password</label>
                     {{ form.password1 }}
@@ -179,5 +185,4 @@
             <p>Already got an account? <a href="sigin-page">log in here</a></p>
         {% endif %}
     </div>
-</body>
-</html>
+{% endblock %}

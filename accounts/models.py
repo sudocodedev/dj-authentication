@@ -55,6 +55,7 @@ class UserAccount(AbstractUser):
     )
     avatar = models.ImageField(upload_to="profile_images/")
     phonenumber = PhoneNumberField(blank=True)
+    login_sms_otp = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
 
