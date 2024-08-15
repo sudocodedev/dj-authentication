@@ -1,7 +1,7 @@
-# import os
-# from dotenv import load_dotenv
+import os
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 
 # print(os.environ.get('SMS_CHEF_API_KEY'),type(os.environ.get('OTP_EXPIRY_TIME')))
@@ -12,9 +12,9 @@
 
 import requests
 
-r = requests.get('https://pokeapi.co/api/v2/pokemon/ditto')
+# r = requests.get('https://pokeapi.co/api/v2/pokemon/ditto')
 
-print(r.status_code, type(r.status_code))
+# print(r.status_code, type(r.status_code))
 
 # # your API secret from (Tools -> API Keys) page
 # apiSecret = "bc1c2752d83275e97123a5463d7e47f95981bcd4"
@@ -46,17 +46,17 @@ print(r.status_code, type(r.status_code))
 #     """
 
 
-# message = {
-#     "secret": apiSecret,
-#     "mode": "devices",
-#     "device": "00000000-0000-0000-ba4c-a3f4ac2727ad",
-#     "sim": 1,
-#     "priority": 1,
-#     "phone": "+919994284205",
-#     "message": body,
-# }
+message = {
+    "secret": os.environ.get('SMS_CHEF_API_KEY'),
+    "mode": "devices",
+    "device": os.environ.get("SMS_CHEF_DEVICE_ID"),
+    "sim": 1,
+    "priority": 1,
+    "phone": "+919363333440",
+    "message": "hello",
+}
 
-# r = requests.post(url="https://www.cloud.smschef.com/api/send/sms", params=message)
+r = requests.post(url=os.environ.get("SMS_CHEF_URL"), params=message)
 
-# # do something with response object
-# print(r.json())
+# do something with response object
+print(r.json())

@@ -10,7 +10,7 @@ class UserAccountAdmin(UserAdmin):
     read_only = ("last_login", "date_joined",)
     ordering = ("email",)
     fieldsets = (
-        (None, {'fields': ('email', 'username', 'password', 'phonenumber', 'avatar')}),
+        (None, {'fields': ('avatar', 'email', 'username', 'password', 'login_sms_otp', 'phonenumber')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser')}),
     )
     add_fieldsets = (

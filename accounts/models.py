@@ -5,6 +5,33 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.conf import settings
 import secrets
 
+
+class Notification(models.Model):
+
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+    )
+
+    MESSAGE_TYPE = (
+        ('info', 'Info'),
+        ('success', 'Success'),
+        ('danger', 'Error'),
+        ('warning', 'Warning'),
+    )
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name = 'user_notification', db_index = True)
+    action = models.CharField(max_length=100)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    message = models.TextField()
+    message_type = models.CharField(max_length=15, choices=MESSAGE_TYPE, default='info')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.user.email} --> {self.message}"
+
+
 class OTP(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name = "user_otp")
     token = models.CharField(max_length=8, default = secrets.token_hex(4))

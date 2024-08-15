@@ -1,17 +1,18 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
     <div class="">
         {% if action == 'edit' %}
-        <div class="">
-            <h2>Edit your account</h2>
-            <span>
-                
-            </span>
-        </div>
+            <div class="">
+                <h2>Edit your account</h2>
+                <span>
+                    
+                </span>
+            </div>
         
 
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" autocomplete="off">
                 {% csrf_token %}
 
                 <div class="profile-pic-container">
@@ -85,7 +86,7 @@
             </form>
         {% else %}
             <h2>Create your account</h2>
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" autocomplete="off">
                 {% csrf_token %}
 
                 <div class="profile-pic-container">
@@ -112,6 +113,7 @@
 
                 <div class="">
                     <label>First Name</label>
+                    <input type="hidden" id="signup-userid" name="userid" value="{{ user_id }}" />
                     {{ form.first_name }}
                     {% if form.first_name.errors %}
                         {% for error in form.first_name.errors %}
@@ -182,7 +184,7 @@
                 <p>By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
             </form>
 
-            <p>Already got an account? <a href="sigin-page">log in here</a></p>
+            <p>Already got an account? <a href="{% url 'signin-page' %}">log in here</a></p>
         {% endif %}
     </div>
 {% endblock %}

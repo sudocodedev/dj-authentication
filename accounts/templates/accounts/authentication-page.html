@@ -5,7 +5,7 @@
         <!-- Login Form -->
         {% if action == "sigin" %}
             <h2 class="">Log in to DJ AUTH</h2>
-            <form method="post">
+            <form method="post"  autocomplete="off">
                 {% csrf_token %}
                 <div class="">
                     <label>Email</label>
@@ -34,13 +34,14 @@
             <a href="{% url 'password-reset' %}">Forgot Password?</a>
             <p>New to DJ AUTH? <a href="{% url 'signup-page' %}">Create an account</a></p>
         <!-- Password Reset Form -->
-        {% elif action == "reset" %}
+        {% elif action == "forgot" %}
             <h2>Forgot your password?</h2>
             <p>Please enter the email address, we will send you instructions to reset your password.</p>
-            <form method="post">
+            <form method="post"  autocomplete="off">
                 {% csrf_token %}
                 <div class="">
                     <label>Email</label>
+                    <input type="hidden" id="userid" name="userid" value="{{ user_id }}" />
                     {{ form.email }}
                     {% if form.email.errors %}
                         {% for error in form.email.errors %}
@@ -61,7 +62,7 @@
         <!-- Set Password form -->
         {% else %}
             <h2>Reset Password</h2>
-            <form method="post">
+            <form method="post"  autocomplete="off">
                 {% csrf_token %}
                 <div class="">
                     <label>New Password</label>
@@ -80,6 +81,10 @@
                             <p class="">{{ error }}</p>
                         {% endfor %}
                     {% endif %}
+                </div>
+                <div class="">
+                    <script src='https://www.google.com/recaptcha/api.js'></script>
+                    <div class="g-recaptcha" data-sitekey="{{ sitekey }}"></div>
                 </div>
                 
                 <button type="submit">Reset</button>

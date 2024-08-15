@@ -33,7 +33,7 @@ class AccountCreationForm(UserCreationForm):
         widgets = {
             'username': forms.TextInput(attrs={'placeholder': "Enter username"}),
             'email': forms.TextInput(attrs={'placeholder': "example@sample.com"}),
-            'phonenumber': forms.TextInput(attrs={'placeholder': "9876543210"}),
+            'phonenumber': forms.TextInput(attrs={'placeholder': "Enter phone number eg.9876543210"}),
             'first_name': forms.TextInput(attrs={'placeholder': "John"}),
             'last_name': forms.TextInput(attrs={'placeholder': "Cruse"}),
             'login_sms_otp': forms.CheckboxInput(attrs={'checked': False})
@@ -97,14 +97,16 @@ class AccountCreationForm(UserCreationForm):
 
     def clean_avatar(self):
         file = self.cleaned_data['avatar']
-        file_suffix = file.name.split('.')[-1]
-        file_size = file.size
-        
-        if file_suffix not in settings.DATA_UPLOAD_FILE_SUFFIX:
-            raise forms.ValidationError(_("upload image with these extensions ➡ *.png, *.jpeg, *.jpg, *.gif"))
-        
-        if file_size > settings.DATA_UPLOAD_MAX_MEMORY_SIZE:
-            raise forms.ValidationError(_("upload image with atmost 3MB in size"))
+        print(file)
+        if file:
+            file_suffix = file.name.split('.')[-1]
+            file_size = file.size
+            
+            if file_suffix not in settings.DATA_UPLOAD_FILE_SUFFIX:
+                raise forms.ValidationError(_("upload image with these extensions ➡ *.png, *.jpeg, *.jpg, *.gif"))
+            
+            if file_size > settings.DATA_UPLOAD_MAX_MEMORY_SIZE:
+                raise forms.ValidationError(_("upload image with atmost 3MB in size"))
 
         return file
 

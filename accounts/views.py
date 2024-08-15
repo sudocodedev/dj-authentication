@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib.auth.forms import SetPasswordForm
 from .forms import AccountCreationForm, AccountLoginForm, AccountEditForm, AccountPwdResetForm
 from django.contrib.auth import login, logout, authenticate
@@ -8,12 +9,13 @@ from django.utils.encoding import force_str, force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from .models import OTP
+from .models import OTP, Notification
 from . import helper
-from .token import account_activation_token
+from .tokens import account_activation_token
 from threading import Thread
 from django.contrib.sites.shortcuts import get_current_site
 import secrets
+from django.conf import settings
 
 
 User = get_user_model() # custom user model
@@ -22,41 +24,53 @@ User = get_user_model() # custom user model
 ######################## LOGIN ########################
 
 def user_signin(request):
+    print("inside login view")
     if request.method == 'POST':
+        print("inside post req")
         form = AccountLoginForm(request, data=request.POST)
         if form.is_valid():
+            print("inside form validation")
             email = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
             user = authenticate(request, username=email, password=password)
 
+            print("authentication -->", user)
 
-            if user:
-                if User.objects.get(email=email).login_sms_otp:
-                    # Enabled Login OTP via SMS
-                    account = User.objects.get(email=email)
-                    otp = OTP.objects.create(
-                                             user=account, 
-                                             token=secrets.randbits(16),
-                                             otp_expires_at = timezone.now() + timezone.timedelta(minutes=5)
-                                            )
-                    # fetching User data
-                    uid = urlsafe_base64_encode(force_bytes(account.id))                
-                    data = {
-                        'phonenumber': account.phonenumber,
-                        'otp': otp.token,
-                    }
-                    # Sending OTP
-                    send_login_otp = Thread(target=helper.login_sms_otp, args=(request, data))
-                    send_login_otp.start()
-                    return redirect("verify-login-otp", uid)
-                else:
-                    # Default Login
-                    login(request, user)
-                    messages.success(request, _("User logged in"))
-                    return redirect('home-page')
+            # if user:
+            print("user has been authenticated")
+            if User.objects.get(email=email).login_sms_otp:
+                print("You are not supposed to be in this block")
+                # Enabled Login OTP via SMS
+                account = User.objects.get(email=email)
+                otp = OTP.objects.create(
+                                            user=account, 
+                                            token=secrets.randbits(16),
+                                            otp_expires_at = timezone.now() + timezone.timedelta(minutes=5)
+                                        )
+                # fetching User data
+                uid = urlsafe_base64_encode(force_bytes(account.id))                
+                data = {
+                    'phonenumber': account.phonenumber.as_e164,
+                    'otp': otp.token,
+                    'user': account,
+                }
+                print(data)
+                # Sending OTP
+                send_login_otp = Thread(target=helper.login_sms_otp, kwargs=data)
+                send_login_otp.start()
+                # messages.info(request, _(f"SMS sent to your mobile {data.get('phonenumber')} with OTP"))
+                return redirect("verify-login-otp", uid)
             else:
-                messages.error(request, _("user credentials are not correct"))
+                # Default Login
+                print("normal login")
+                login(request, user)
+                messages.success(request, _("User logged in"))
+                return redirect('home-page')
+        else:
+            print("I'm here in last error part")
+            messages.error(request, _("user credentials are not correct"))
+            return render(request, 'accounts/authentication-page.html', { 'form': form, 'action': 'sigin' })
     else:
         form = AccountLoginForm()
 
@@ -72,7 +86,7 @@ def verify_login_otp(request, uidb64):
     if request.method == "POST":
         if request.POST.get('otp_code') == db_otp.token:
             if db_otp.otp_expires_at > timezone.now():
-                login(request, user)
+                login(request, user, backend='accounts.backend.AuthAccountBackend')
                 messages.success(request, _("User logged in"))
                 return redirect('home-page')
             else:
@@ -82,7 +96,21 @@ def verify_login_otp(request, uidb64):
             messages.error(request, _("Invalid OTP, Enter a valid one"))
             return redirect("verify-login-otp", uidb64)
     
-    return render(request, 'accounts/verify_account.html', {'action': 'login', 'id': uidb64})
+    return render(request, 'accounts/verify_account.html', {'action': 'login', 'id': uidb64, 'user_id': uid, 'sitekey': settings.RECAPTCHA_PUBLIC_KEY})
+
+def signin_status(request,userID):
+    try:
+        notification = Notification.objects.filter(user__id=userID, action="signin-sms").latest('created_at')
+
+        return JsonResponse({'status': notification.status,
+                             'type': notification.message_type,
+                             'action': notification.action,
+                             'message': notification.message}, safe=True)
+    except:
+        return JsonResponse({
+            'status': "NA",
+            'message': "No notifications found for this user"
+        })
 
 
 def resend_login_sms_otp(request, uidb64):
@@ -95,11 +123,12 @@ def resend_login_sms_otp(request, uidb64):
                             )
     # fetching User data                
     data = {
-        'phonenumber': account.phonenumber,
+        'phonenumber': account.phonenumber.as_e164,
         'otp': otp.token,
+        'user': account,
     }
     # Sending OTP
-    send_login_otp = Thread(target=helper.login_sms_otp, args=(request, data))
+    send_login_otp = Thread(target=helper.login_sms_otp, kwargs=data)
     send_login_otp.start()
     return redirect("verify-login-otp", uidb64)
 
@@ -123,9 +152,9 @@ def user_signup(request):
             user.username = form.cleaned_data.get('username').lower()
             user.is_active = False
             user.save()
-            messages.success(request, _("OTP(s) have been sent to your mail address & SMS"))
-            messages.success(request, _("You can close this window now!"))
-            return redirect('home-page') # Redirecting User to login page
+            print(user.id)
+            messages.info(request, _("Account Verification process initiated"))
+            return render(request, 'accounts/accounts.html', {'form': form, 'user_id': user.id})
         else:
             messages.error(request, _("Kindly check below errors"))
     else:
@@ -156,6 +185,27 @@ def verify_account(request, uidb64):
     
     return render(request, 'accounts/verify_account.html')
 
+
+def signup_status(request, userID):
+    try:
+        message = {}
+        email = Notification.objects.filter(user__id=userID, action="signup-email").latest('created_at')
+        sms = Notification.objects.filter(user__id=userID, action="signup-sms").latest('created_at')
+
+        return JsonResponse({
+            'key': 2,
+            'email': {'status': email.status, 'action': email.action, 'type': email.message_type, 'message': email.message, },
+            'sms': {'status': sms.status, 'action': sms.action, 'type': sms.message_type, 'message': sms.message, }
+        })
+    
+    except Notification.DoesNotExist:
+        return JsonResponse({
+            'key': 1,
+            'status': 'NA',
+            'message': "No notifications found for this user"
+        })
+
+
 def resend_otp(request):
     if request.method == "POST":
         email = request.POST.get("email").lower()
@@ -171,26 +221,24 @@ def resend_otp(request):
         otp = OTP.objects.create(user=user, otp_expires_at=timezone.now() + timezone.timedelta(minutes=5))
 
         data = {
-            'user': user.username,
-            'email': email,
-            'phonenumber': phonenumber,
+            'user': user,
             'uid': urlsafe_base64_encode(force_bytes(user.id)),
             'otp': otp.token,
             'protocol': 'https' if request.is_secure() else 'http',
             'domain': get_current_site(request).domain,
         }
 
-        send_email_otp = Thread(target = helper.send_otp_mail, args=(request, data))
-        # send_sms_otp = Thread(target = helper.send_otp_sms, args=(request, data))
+        print(data['user'].email, data['user'].phonenumber)
+        send_email_otp = Thread(target = helper.send_otp_mail, kwargs=data)
+        send_sms_otp = Thread(target = helper.send_otp_phone, kwargs=data)
 
         send_email_otp.start()
-        # send_sms_otp.start()
+        send_sms_otp.start()
 
-        messages.success(request, _("OTP(s) have been sent to your mail address & SMS"))
-        messages.success(request, _("You can close this browser window!"))
-        return redirect('resend-otp')
+        messages.info(request, _("Account Verification process re-initiated"))
+        return render(request, 'accounts/verify_account.html', {'action': 'resend', 'user_id': user.id, 'sitekey': settings.RECAPTCHA_PUBLIC_KEY})
 
-    context={'action': 'resend',}
+    context={'action': 'resend', 'sitekey': settings.RECAPTCHA_PUBLIC_KEY}
     return render(request, 'accounts/verify_account.html', context)
 
 ######################## END SIGN UP ########################
@@ -198,33 +246,53 @@ def resend_otp(request):
 
 ######################## FORGOT Password ########################
 
+
 def password_reset(request):
+
+    user_id = ''
     if request.method == "POST":
         form = AccountPwdResetForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('email')
             user = User.objects.get(email=email)
-            
+            user_id = user.id
             data = {
-                'user': user.username,
+                'user': user,
                 'uid': urlsafe_base64_encode(force_bytes(user.id)),
-                'email': email,
                 'token': account_activation_token.make_token(user),
                 'domain': get_current_site(request).domain,
                 'protocol': 'https' if request.is_secure() else 'http',
             }
-
-            reset_email = Thread(target=helper.send_password_reset, args=(request, data))
+            
+            reset_email = Thread(target=helper.send_password_reset, kwargs=data)
             reset_email.start()
 
-            return redirect('password-reset')
+            messages.info(request, _("Password Reset process initiated"))
+            return render(request, 'accounts/authentication-page.html', {'form': form, 'action': 'forgot', 'user_id': user_id})
         else:
             # for rendering form field errors
-            return render(request, 'accounts/authentication-page.html', {'form': form, 'action': 'reset'})
+            return render(request, 'accounts/authentication-page.html', {'form': form, 'action': 'forgot'})
     else:
         form = AccountPwdResetForm()
-    context = {'action': 'reset', 'form': form,}
+
+    context = {'action': 'forgot', 'form': form, 'user_id': user_id}
     return render(request, 'accounts/authentication-page.html', context)
+
+
+def password_reset_status(request, userID):
+    try:
+        notification = Notification.objects.filter(user__id=userID).latest('created_at')
+
+        return JsonResponse({'status': notification.status,
+                             'type': notification.message_type,
+                             'action': notification.action,
+                             'message': notification.message}, safe=True)
+    except:
+        return JsonResponse({
+            'status': "NA",
+            'message': "No notifications found for this user"
+        })
+
 
 def password_reset_request(request, uidb64, token):
     try:
@@ -247,7 +315,7 @@ def password_reset_request(request, uidb64, token):
                     messages.error(request, error)
     
         form = SetPasswordForm(user)
-        context = {'action': "setpwd",'form': form}
+        context = {'action': "setpwd",'form': form, 'sitekey': settings.RECAPTCHA_PUBLIC_KEY}
         return render(request, 'accounts/authentication-page.html', context)
     
     else:
@@ -271,7 +339,7 @@ def account_reset_password(request, accountID):
             return redirect('account-view-page',user.id)
         
     form = SetPasswordForm(user)
-    context = {'action': 'setpwd', 'form': form}
+    context = {'action': 'setpwd', 'form': form, 'sitekey': settings.RECAPTCHA_PUBLIC_KEY}
     return render(request, 'accounts/authentication-page.html', context)
 
 

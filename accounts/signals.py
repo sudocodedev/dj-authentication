@@ -28,20 +28,20 @@ def user_handler(sender, instance, created, *args, **kwargs):
             raise Exception("Request not found in the storage")
 
         data = {
-            'user': instance.username,
+            'user': instance,
             'uid': urlsafe_base64_encode(force_bytes(instance.id)),
             'otp': otp.token,
-            'email': instance.email,
-            'phone': instance.phonenumber,
             'protocol': 'https' if request.is_secure() else 'http',
             'domain': get_current_site(request).domain,
         }
 
-        send_email_otp = Thread(target=helper.send_otp_mail, args=(request, data))
-        # send_phone_otp = Thread(target = helper.send_otp_phone, args=(request, data))
+        print(data['user'].phonenumber.as_e164)
+
+        send_email_otp = Thread(target=helper.send_otp_mail, kwargs=data)
+        send_phone_otp = Thread(target=helper.send_otp_phone, kwargs=data)
 
         send_email_otp.start()
-        # send_phone_otp.start()
+        send_phone_otp.start()
     
 
 

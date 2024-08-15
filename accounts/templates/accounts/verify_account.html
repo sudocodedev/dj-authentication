@@ -1,37 +1,66 @@
 {% extends 'index.html' %}
 
+
 {% block content %}
     {% if action == "resend" %}
-
         <h1>Resend OTP</h1>
-        <form action="" method="post">
+        <form action="" method="post" autocomplete="off">
             {% csrf_token %}
-            <label>Email</label>
-            <input name="email" type="email" placeholder="Enter mail address"/>
-            <label>Phone Number</label>
-            <input name="phonenumber" type="tel" placeholder="Enter phone number eg. 9876543210"/>
+            <input type="hidden" id="resend-userid" name="userid" value="{{ user_id }}" />
+            <div class="">
+                <label>Email</label>
+                <input name="email" type="email" placeholder="Enter mail address"/>
+            </div>
+
+            <div class="">
+                <label>Phone Number</label>
+                <input name="phonenumber" type="tel" placeholder="Enter phone number eg. 9876543210"/>
+            </div>
+            
+            <div class="">
+                <script src='https://www.google.com/recaptcha/api.js'></script>
+                <div class="g-recaptcha" data-sitekey="{{ sitekey }}"></div>
+            </div>
             <button type="submit">Send OTP</button>        
         </form>
     
-    {% if action == "login" %}
+    {% elif action == "login" %}
     
         <h1>Verify OTP for LOGIN</h1>
-        <form action="" method="post">
+        <form action="" method="post" autocomplete="off">
             {% csrf_token %}
-            <label>OTP</label>
-            <input name="otp_code" type="text" placeholder="Enter OTP from SMS"/>
+            <input type="hidden" id="signin-userid" name="userid" value="{{ user_id }}" />
+            
+            <div class="">
+                <label>OTP</label>
+                <input name="otp_code" type="text" placeholder="Enter OTP from SMS"/>
+            </div>
+
+            <div class="">
+                <script src='https://www.google.com/recaptcha/api.js'></script>
+                <div class="g-recaptcha" data-sitekey="{{ sitekey }}"></div>
+            </div>
+
             <button type="submit">VERIFY</button>        
         </form>
 
-        <p>Need a new OTP? <a href="{% url 'resend-login-sms-otp' uidb64=uidb64 %}">Resend OTP</a></p>
+        <p>Need a new OTP? <a href="{% url 'resend-login-sms-otp' uidb64=id %}">Resend OTP</a></p>
 
     {% else %}
 
         <h1>Verify OTP</h1>
-        <form action="" method="post">
+        <form action="" method="post" autocomplete="off">
             {% csrf_token %}
-            <label>OTP</label>
-            <input name="otp_code" type="text" placeholder="Enter OTP (4 digits from MAIL + 4 digits from SMS)"/>
+            <div class="">
+                <label>OTP</label>
+                <input name="otp_code" type="text" placeholder="Enter OTP (4 digits from MAIL + 4 digits from SMS)"/>
+            </div>
+
+            <div class="">
+                <script src='https://www.google.com/recaptcha/api.js'></script>
+                <div class="g-recaptcha" data-sitekey="{{ sitekey }}"></div>
+            </div>
+            
             <button type="submit">Activate Account</button>        
         </form>
 
