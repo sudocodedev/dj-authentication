@@ -4,6 +4,10 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('account/', include("accounts.urls")),
-    path('', views.home_page, name="home-page"),
+    
+    path('', views.home_page, name="home-page"), # home page    
+    
+    path('account/', include("accounts.urls")), # Authentication & Account creation
+
+    path('auth/', include('social_django.urls', namespace='social')), # social auth
 ]

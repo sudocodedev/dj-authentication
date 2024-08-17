@@ -5,6 +5,12 @@
         <!-- Login Form -->
         {% if action == "sigin" %}
             <h2 class="">Log in to DJ AUTH</h2>
+            
+            <div class="">
+                <a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a>
+                <a href="{% url 'social:begin' 'github' %}">Login with Github</a>
+            </div>
+            <hr>
             <form method="post"  autocomplete="off">
                 {% csrf_token %}
                 <div class="">

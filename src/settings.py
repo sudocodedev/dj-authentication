@@ -39,6 +39,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'phonenumber_field',
     'django_recaptcha',
+    'social_django',
 ]
 
 MY_APPS = [
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
     
     # custom
     'src.middleware.my_middleware.ServeRequestMiddleware',
@@ -67,6 +69,8 @@ ROOT_URLCONF = 'src.urls'
 AUTH_USER_MODEL = 'accounts.UserAccount'
 
 AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.github.GithubOAuth2',
     'accounts.backend.AuthAccountBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -156,3 +160,34 @@ PASSWORD_RESET_TIMEOUT = 14400
 # Google ReCaptcha settings
 RECAPTCHA_PUBLIC_KEY = os.environ.get('CAPTCHA_SITE_KEY')
 RECAPTCHA_PRIVATE_KEY = os.environ.get('CAPTCHA_SECRET_KEY')
+
+# social auth
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_SECRET')
+
+SOCIAL_AUTH_GITHUB_KEY = os.environ.get('GITHUB_KEY')
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.get('GITHUB_SECRET')
+
+
+SOCIAL_AUTH_USER_MODEL = 'accounts.UserAccount'
+SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'accounts.pipeline.link_to_existing_user',  # custom
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+    
+    
+)
+
+# Redirect URLs
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
