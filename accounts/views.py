@@ -149,7 +149,6 @@ def user_signup(request):
         form = AccountCreationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(commit=False)
-            user.username = form.cleaned_data.get('username').lower()
             user.is_active = False
             user.save()
             print(user.id)
@@ -332,6 +331,10 @@ def account_reset_password(request, accountID):
     if request.method == "POST":
         form = SetPasswordForm(user, request.POST)
         if form.is_valid():
+            if user.check_password(request.POST.get('new_password1')):
+                messages.error(request, _("New Password cannot be same as old password"))
+                return redirect('account-reset-password', user.id)
+
             form.save()
             user.refresh_from_db()
             user.save()
@@ -365,11 +368,10 @@ def account_edit(request, accountID):
         return redirect('home-page')
     
     if request.method == 'POST':
-        form = AccountEditForm(request.POST, instance = request.user)
+        form = AccountEditForm(request.POST, request.FILES, instance = request.user)
         
         if form.is_valid():
             user = form.save(commit=False)
-            user.username = form.cleaned_data.get('username').lower()
             user.email = form.cleaned_data.get('email').lower()
             user.save()
             messages.success(request, _("Account updated successfully"))
@@ -379,7 +381,18 @@ def account_edit(request, accountID):
     else:
         form = AccountEditForm(instance=request.user)
 
-    context = {'form': form, 'action': 'edit'}
+    context = {'form': form, 'action': 'edit', 'account': account}
     return render(request, 'accounts/accounts.html', context)
+
+
+def account_delete(request, accountID):
+    try:
+        account = User.objects.get(id=accountID)
+        account.delete()
+    except User.DoesNotExist:
+        messages.error(request, _("User doesn't exist, redirecting to home page"))
+
+    return redirect('home-page')
+    
 
 ######################## END PROFILE ########################

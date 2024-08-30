@@ -17,7 +17,7 @@ class Notification(models.Model):
     MESSAGE_TYPE = (
         ('info', 'Info'),
         ('success', 'Success'),
-        ('danger', 'Error'),
+        ('error', 'Error'),
         ('warning', 'Warning'),
     )
 

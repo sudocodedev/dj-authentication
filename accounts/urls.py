@@ -1,7 +1,6 @@
 from django.urls import path
 from . import views
-from django.conf.urls.static import static
-from django.conf import settings
+
 
 urlpatterns = [
     # Login
@@ -15,6 +14,7 @@ urlpatterns = [
     # Profile CRUD
     path("edit/<int:accountID>/", views.account_edit, name="account-edit-page"),
     path("view/<int:accountID>/", views.account_view, name="account-view-page"),
+    path("delete/<int:accountID>/", views.account_delete, name="account-delete-page"),
     
     # Account creation / signup
     path("signup/", views.user_signup, name="signup-page"),
@@ -30,7 +30,3 @@ urlpatterns = [
     # Logged in user password reset
     path("account-reset-password/<int:accountID>/", views.account_reset_password, name="account-reset-password"),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
-

@@ -13,7 +13,7 @@ MESSAGE_TAGS = {
     messages.INFO: "alert-info",
     messages.SUCCESS: "alert-success",
     messages.WARNING: "alert-warning",
-    messages.ERROR: "alert-danger",
+    messages.ERROR: "alert-error",
 }
 
 
@@ -40,6 +40,7 @@ THIRD_PARTY_APPS = [
     'phonenumber_field',
     'django_recaptcha',
     'social_django',
+    'widget_tweaks',
 ]
 
 MY_APPS = [

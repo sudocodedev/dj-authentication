@@ -49,11 +49,11 @@ def login_sms_otp(**kwargs):
             notification.message = _(f"SMS sent to your mobile {phone_number} with login OTP")
         else:
             notification.status = 'failed'
-            notification.message_type = 'danger'
+            notification.message_type = 'error'
             notification.message = _(f"Problem in sending SMS to {phone_number}")
     except Exception as e:
         notification.status = 'failed'
-        notification.message_type = 'danger'
+        notification.message_type = 'error'
         notification.message = _("There is a server issue in sending SMS, Please try after sometime")
     
     notification.save()
@@ -115,12 +115,12 @@ def send_otp_phone(**kwargs):
             notification.message = _(f"Account Verification SMS sent successfully to {phone_number}")
         else:
             notification.status = 'failed'
-            notification.message_type = 'danger'
+            notification.message_type = 'error'
             notification.message = _(f"Problem in sending SMS to {phone_number}")
 
     except Exception as e:
         notification.status = 'failed'
-        notification.message_type = 'danger'
+        notification.message_type = 'error'
         notification.message = _("There is a server issue in sending SMS, Please try after sometime")
 
     notification.save()
@@ -165,11 +165,11 @@ def send_otp_mail(**kwargs):
             notification.message = _(f"Account Verification mail successfully sent to {data.get('email')}")
         else:
             notification.status = 'failed'
-            notification.message_type = 'danger'
+            notification.message_type = 'error'
             notification.message = _(f"Problem in sending mail to {data.get('email')}, Double check once!")
     except Exception as e:
         notification.status = 'failed'
-        notification.message_type = 'danger'
+        notification.message_type = 'error'
         notification.message = _("There is a server issue in sending mail, Please try after sometime")
     
     notification.save()
@@ -213,12 +213,12 @@ def send_password_reset(**kwargs):
             notification.message = _(f"Password reset mail sent successfully to {data.get('email')}")
         else:
             notification.status = 'failed'
-            notification.message_type = 'danger'
+            notification.message_type = 'error'
             notification.message = _(f"Problem in sending mail to {data.get('email')}")
     
     except Exception as e:
         notification.status = 'failed'
-        notification.message_type = 'danger'
+        notification.message_type = 'error'
         notification.message = _("There was a server issue, Please try after sometime")
 
     notification.save()

@@ -5,34 +5,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script defer src="{% static 'js/script.js' %}"></script>
     <title>DJ Auth</title>
 </head>
 <body>
-    <!-- Alerts, messages -->
-    <div class="messages">
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message|safe }}</p>
-        {% endfor %}
-    {% endif %}
-    <div class="status"></div>
+    <div id="messages" class="toast toast-top toast-end z-10">
+        <!-- <div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto">
+        <span>New mail arrived.</span>
+        <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+        </div>
+        <div class="alert alert-success items-center flex-shrink-0 notification w-fit ms-auto">
+        <span>Message sent successfully.</span>
+        <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+        </div>
+        <div class="alert alert-error items-center flex-shrink-0 notification w-fit ms-auto">
+          <span>Message sent successfully.Message sent successfully.Message sent successfully.</span>
+          <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+        </div> -->
+
+        {% if messages %}
+          {% for message in messages %}
+          <div class="alert {{ message.tags }} items-center flex-shrink-0 notification w-fit ms-auto">
+            <span>{{ message }}</span>
+            <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+          </div>
+          {% endfor %}
+        {% endif %}
+        <div class="status"></div>
     </div>
+    
+    <div id="main" class="main flex flex-col min-h-screen">
+        <!-- Navbar -->
+        <div class="navbar bg-base-100 sticky top-0 drop-shadow-2xl">
+            <div class="flex-1">
+            <a href="{% url 'home-page' %}" class="btn btn-ghost text-xl">DJ Auth</a>
+            </div>
+            <div class="flex-none">
+                <label class="swap swap-rotate mr-4">
+                    <!-- this hidden checkbox controls the state -->
+                    <input class="hidden" type="checkbox" />
+                
+                    <!-- sun icon -->
+                    <svg
+                    class="swap-on h-6 w-6 fill-current"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24">
+                    <path
+                        d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+                    </svg>
+                
+                    <!-- moon icon -->
+                    <svg
+                    class="swap-off h-6 w-6 fill-current"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24">
+                    <path
+                        d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+                    </svg>
+                </label>
+                
+                <div class="dropdown dropdown-end mr-2.5">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full">
+                        {% if request.user.is_authenticated %}
+                          <img alt="avatar-pic" src="{{ request.user.avatar.url }}" />
+                        {% else %}
+                          <img alt="avatar-pic" src="{% static 'assets/user.png' %}" />
+                        {% endif %}
+                    </div>
+                    </div>
+                    <ul
+                    tabindex="0"
+                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                    {% if request.user.is_authenticated %}
+                      <li><a href="{% url 'account-view-page' request.user.id %}">Profile</a></li>
+                      <li><a href="{% url 'account-reset-password' request.user.id %}">Change Password</a></li>
+                      <li><a href="{% url 'signout-page' %}">Logout</a></li>
+                    {% else %}
+                      <li><a href="{% url 'signup-page' %}">Create Account</a></li>
+                      <li><a href="{% url 'signin-page' %}">Login</a></li>
+                      <li><a>About</a></li>
+                    {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- End Navbar -->
 
-    <!-- Navbar -->
+        <!-- Main section -->
+		<div class="content min-h-screen flex flex-col items-center">
+			{% block content %}
 
-    <!-- End Navbar -->
+			{% endblock %}
+		</div>
+		<!-- End Main -->
 
-    <!-- Main section -->
-    <div class="content">
-        {% block content %}
-
-        {% endblock %}
+		<!-- Footer -->
+		<footer class="footer footer-center bg-base-200 text-base-content rounded p-10">
+			<nav class="grid grid-flow-col gap-4">
+			  <a class="link link-hover">About us</a>
+			  <a class="link link-hover">Contact</a>
+			  <a class="link link-hover">Features</a>
+			  <a class="link link-hover">Subscribe</a>
+			</nav>
+			<nav>
+			  <div class="grid grid-flow-col gap-4">
+				<a href="https://github.com/sudocodedev" target="_blank" rel="noopener noreferrer">
+					<svg width="25px" height="25px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>github [#142]</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -7559.000000)" fill="#000000"> <g id="icons" transform="translate(56.000000, 160.000000)"> <path d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399" id="github-[#142]"> </path> </g> </g> </g> </g></svg>
+				  </a>
+			
+				  <!-- Instagram -->
+				  <a href="https://www.instagram.com/__s_h_i_v_a_7__/" target="_blank" rel="noopener noreferrer">
+					<svg height="25px" width="25px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 551.034 551.034" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="XMLID_13_"> <linearGradient id="XMLID_2_" gradientUnits="userSpaceOnUse" x1="275.517" y1="4.5714" x2="275.517" y2="549.7202" gradientTransform="matrix(1 0 0 -1 0 554)"> <stop offset="0" style="stop-color:#E09B3D"></stop> <stop offset="0.3" style="stop-color:#C74C4D"></stop> <stop offset="0.6" style="stop-color:#C21975"></stop> <stop offset="1" style="stop-color:#7024C4"></stop> </linearGradient> <path id="XMLID_17_" style="fill:url(#XMLID_2_);" d="M386.878,0H164.156C73.64,0,0,73.64,0,164.156v222.722 c0,90.516,73.64,164.156,164.156,164.156h222.722c90.516,0,164.156-73.64,164.156-164.156V164.156 C551.033,73.64,477.393,0,386.878,0z M495.6,386.878c0,60.045-48.677,108.722-108.722,108.722H164.156 c-60.045,0-108.722-48.677-108.722-108.722V164.156c0-60.046,48.677-108.722,108.722-108.722h222.722 c60.045,0,108.722,48.676,108.722,108.722L495.6,386.878L495.6,386.878z"></path> <linearGradient id="XMLID_3_" gradientUnits="userSpaceOnUse" x1="275.517" y1="4.5714" x2="275.517" y2="549.7202" gradientTransform="matrix(1 0 0 -1 0 554)"> <stop offset="0" style="stop-color:#E09B3D"></stop> <stop offset="0.3" style="stop-color:#C74C4D"></stop> <stop offset="0.6" style="stop-color:#C21975"></stop> <stop offset="1" style="stop-color:#7024C4"></stop> </linearGradient> <path id="XMLID_81_" style="fill:url(#XMLID_3_);" d="M275.517,133C196.933,133,133,196.933,133,275.516 s63.933,142.517,142.517,142.517S418.034,354.1,418.034,275.516S354.101,133,275.517,133z M275.517,362.6 c-48.095,0-87.083-38.988-87.083-87.083s38.989-87.083,87.083-87.083c48.095,0,87.083,38.988,87.083,87.083 C362.6,323.611,323.611,362.6,275.517,362.6z"></path> <linearGradient id="XMLID_4_" gradientUnits="userSpaceOnUse" x1="418.306" y1="4.5714" x2="418.306" y2="549.7202" gradientTransform="matrix(1 0 0 -1 0 554)"> <stop offset="0" style="stop-color:#E09B3D"></stop> <stop offset="0.3" style="stop-color:#C74C4D"></stop> <stop offset="0.6" style="stop-color:#C21975"></stop> <stop offset="1" style="stop-color:#7024C4"></stop> </linearGradient> <circle id="XMLID_83_" style="fill:url(#XMLID_4_);" cx="418.306" cy="134.072" r="34.149"></circle> </g> </g></svg>
+				  </a>
+			
+				  <!-- Dev.to -->
+				  <a href="https://dev.to/foxycoder123" target="_blank" rel="noopener noreferrer">
+					<svg xmlns="http://www.w3.org/2000/svg" aria-label="dev.to" role="img" viewBox="0 0 512 512" width="25px" height="25px" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><rect width="512" height="512" rx="15%"></rect><path fill="#ffffff" d="M140.47 203.94h-17.44v104.47h17.45c10.155-.545 17.358-8.669 17.47-17.41v-69.65c-.696-10.364-7.796-17.272-17.48-17.41zm45.73 87.25c0 18.81-11.61 47.31-48.36 47.25h-46.4V172.98h47.38c35.44 0 47.36 28.46 47.37 47.28zm100.68-88.66H233.6v38.42h32.57v29.57H233.6v38.41h53.29v29.57h-62.18c-11.16.29-20.44-8.53-20.72-19.69V193.7c-.27-11.15 8.56-20.41 19.71-20.69h63.19zm103.64 115.29c-13.2 30.75-36.85 24.63-47.44 0l-38.53-144.8h32.57l29.71 113.72 29.57-113.72h32.58z"></path></g></svg>
+				  </a>
+			  </div>
+			</nav>
+			<aside>
+			  <p>Copyright © 2024 - All right reserved by DJ Auth</p>
+			</aside>
+		  </footer>
+		<!-- End Footer -->
     </div>
-    <!-- End Main -->
-
-    <!-- Footer -->
-
-    <!-- End Footer -->
 </body>
 </html>

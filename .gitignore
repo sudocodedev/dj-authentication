@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,vim,venv,virtualenv,visualstudiocode,django,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,vim,venv,virtualenv,visualstudiocode,django,node
 
+# tailwindcss
+input/*
+
 ### Django ###
 *.log
 *.pot

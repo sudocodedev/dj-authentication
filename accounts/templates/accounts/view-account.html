@@ -1,10 +1,54 @@
 {% extends 'index.html' %}
 
+{% load static %}
+
 {% block content %}
-    <img src="{{ account.avatar.url }}" alt="profile-pic">
-    {{ account.username }}
-    {{ account.email }}
-    {{ account.phonenumber }}
-    {{ account.first_name }}
-    {{ account.last_name }}
+
+    <div class="bg-white w-[32%] rounded-xl mt-10 ring-2 ring-slate-400 shadow-xl">
+        <div class="flex flex-row justify-between items-center">
+            <a href="{% url 'home-page' %}" class="">
+                <div class="tooltip tooltip-right text-xl ml-4 p-2" data-tip="Back">
+                    <i class='bx bx-arrow-back cursor-pointer text-2xl text-slate-800 hover:text-slate-600'></i>
+                </div>
+            </a>
+            <a href="{% url 'account-edit-page' account.id %}" class="">
+                <div class="tooltip tooltip-left text-xl mr-4 p-2" data-tip="Edit">
+                    <i class='bx bx-edit-alt cursor-pointer text-2xl text-slate-800 hover:text-slate-600'></i>
+                </div>
+            </a>
+        </div>
+        <div class="flex flex-col items-center px-10 py-8 gap-3">
+            <p class="font-semibold tracking-widest p-2 text-4xl text-slate-950 text-center -mt-5 mb-3">Profile</p>
+            <div class="flex flex-col items-center justify-center gap-2">
+                {% if account.avatar.url %}
+                    <img class="rounded-full ring ring-offset-2 ring-blue-300 hover:ring-blue-500 focus:ring-blue-500 ring-offset-slate-300" height="150px" width="150px" src="{{ account.avatar.url }}" alt="profile-pic">
+                {% else %}
+                <img class="rounded-full ring ring-offset-2 ring-blue-300 hover:ring-blue-500 focus:ring-blue-500 ring-offset-slate-300" height="150px" width="150px" src="{% static 'assets/user.png' %}" alt="profile-pic">
+                {% endif %}
+
+
+                
+                <p class="font-medium italic text-slate-900 hover:text-slate-800 cursor-pointer tracking-wider">
+                    {% if account.avatar.url %}
+                        @{{ account.username }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </p>
+            </div>    
+            <p class="text-slate-900 font-semibold"> 
+                First Name: <span class="tracking-wide font-normal">{% if account.first_name %} {{ account.first_name }} {% else %} N/A {% endif %}</span> &nbsp; &nbsp; &nbsp;
+                Last Name: <span  class="tracking-wide font-normal">{% if account.last_name %} {{ account.last_name }} {% else %} N/A {% endif %}</span>
+            </p>
+            <div class="text-slate-900 font-semibold">
+                <i class='bx bx-envelope'></i> Email: 
+                <span class="tracking-wide font-normal">{% if account.email %} {{ account.email }} {% else %} N/A {% endif %}</span>
+            </div>
+            <div class="text-slate-900 font-semibold">
+                <i class='bx bx-phone' ></i> Mobile: 
+                <span class="tracking-wide font-normal">{% if account.phonenumber %} {{ account.phonenumber }} {% else %} N/A {% endif %}</span>
+            </div>
+        </div>
+    </div>
+    
 {% endblock %}

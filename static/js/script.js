@@ -1,9 +1,12 @@
 let message_status = document.querySelector(".status");
+let toast_notification = document.getElementById("messages");
 
 let signup_email="undone";
 let signup_sms="undone";
 
 let polling;
+
+let options = {childList: true};
 
 function NotificationStatus(url) {
     fetch(url)
@@ -12,11 +15,17 @@ function NotificationStatus(url) {
         console.log(data);
         if(data.status !== 'NA'){
             message_status.innerHTML += `
-                <p class="alert alert-${data.type}">${data.message}</p>
+                <div class="alert alert-${data.type} items-center flex-shrink-0 notification w-fit ms-auto">
+                    <span>${data.message}</span>
+                    <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+                </div>
             `
             if (data.status === 'success' && data.action === "forgot-pwd"){
                 message_status.innerHTML += `
-                    <p class="alert alert-info">you can close this window</p>
+                    <div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto">
+                        <span>you can close this window</span>
+                        <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+                    </div>
                 `
             }
             if(data.status !== 'pending'){
@@ -30,11 +39,17 @@ function NotificationStatus(url) {
 
 function DisplayStatus(content) {
     message_status.innerHTML += `
-        <p class="alert alert-${content.type}">${content.message}</p>
+        <div class="alert alert-${content.type} items-center flex-shrink-0 notification w-fit ms-auto">
+            <span>${content.message}</span>
+            <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+        </div>
     `
     if (content.action === 'signup-sms' && content.status === 'success' ){
         message_status.innerHTML += `
-            <p class="alert alert-info">you can close this window</p>
+            <div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto">
+                <span>you can close this window</span>
+                <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
+            </div>
         `
     }
     if(content.status !== 'pending'){
@@ -75,6 +90,41 @@ function SignUpNotificationStatus(url) {
     })
 }
 
+
+function detectNotifications(mutations) {
+    for (let mutation of mutations) {
+        if(mutation.type === 'childList') {
+            console.log("A child node has been added or removed.");
+        }
+    }
+}
+
+function clearNotification(){
+    let notification = document.querySelector('.notification');
+    setTimeout(()=>{
+        notification.style.display = 'none';
+    }, 2000);
+}
+
+function imageUpload(event, imgID){
+    const file = event.target.files[0];
+
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById(imgID);
+            if(img) {
+                console.log("Image found");
+                img.src = e.target.result;
+                console.log("Img changed");
+            } else {
+                console.log("Img not found");
+            }
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
 if(document.getElementById('userid') && document.getElementById('userid').value) {
     let user_id = document.getElementById('userid').value;
     const URL = `/account/password-reset-status/${user_id}/`;
@@ -105,3 +155,154 @@ if(document.getElementById('resend-userid') && document.getElementById('resend-u
 }
 
 
+// Removing toast notifications
+// toast_notification.addEventListener('click', (e) => {
+//     if(e.target.className.includes('dismiss')){
+//         let notification = e.target.parentElement;
+//         toast_notification.removeChild(notification);
+//     }
+// });
+
+// observer = new MutationObserver(detectNotifications);
+
+// observer.observe(toast_notification, options);
+
+
+// Profile picture
+if(document.getElementById('id_avatar')){
+    const img_input = document.getElementById('id_avatar');
+    img_input.addEventListener('change', (e) => {
+        imageUpload(e, "avatar-pic-overview");
+    });
+}
+
+
+/***  Password strength checker ***/
+
+// Patterns to check whether password contains lowercase, uppercase, numbers, special characters respectively
+const PATTERNS = [ /[a-z]+/, /[A-Z]+/, /[0-9]+/, /[\!@#$%^&*+_\-=\[\]{};:'",.<>?/\\|`~]+/ ];
+
+// Pattern check flags
+let LOWERCASE_CHECK = false;
+let UPPERCASE_CHECK = false;
+let DIGIT_CHECK = false;
+let SPECIAL_CHARACTERS_CHECK = false;
+
+// Minimum Password length
+const MINIMUM_PASSWORD_LENGTH = 8;
+
+// Indicator, Message
+let message = '';
+let indicator = '';
+let text_color = '';
+
+function passwordStrength(password) {
+
+    if (typeof password !== 'string' || password === null) {
+        return null;
+    }
+    const password_length = password.length;
+
+    if (password_length < MINIMUM_PASSWORD_LENGTH) {
+        message = 'Password should be atleast 8 characters long';
+        indicator = 'Weak';
+        text_color = '#dc2626';
+
+    } else {
+        LOWERCASE_CHECK = PATTERNS[0].test(password);
+        UPPERCASE_CHECK = PATTERNS[1].test(password);
+        DIGIT_CHECK = PATTERNS[2].test(password);
+        SPECIAL_CHARACTERS_CHECK = PATTERNS[3].test(password);
+
+        
+        // console.log(
+        //     'l -> ', LOWERCASE_CHECK, 
+        //     'u -> ', UPPERCASE_CHECK, 
+        //     'd -> ', DIGIT_CHECK, 
+        //     's -> ', SPECIAL_CHARACTERS_CHECK
+        // );
+
+        // determing password strength indicator
+        if(LOWERCASE_CHECK && UPPERCASE_CHECK && DIGIT_CHECK && SPECIAL_CHARACTERS_CHECK) {
+            indicator = "Very Strong";
+            message = "Your password is highly secure";
+            text_color = '#16a34a';
+        } 
+        else if (LOWERCASE_CHECK && UPPERCASE_CHECK && DIGIT_CHECK) {
+            indicator = "Strong";
+            message = "For better security, use special characters (!@#$%^&* etc,.)";
+            text_color = '#10b981';
+        }
+        else if (DIGIT_CHECK && LOWERCASE_CHECK) {
+            indicator = "Moderate";
+            message = "For better security, use uppercase (A-Z), special characters (!@#$%^&* etc,.)";
+            text_color = '#f59e0b';
+        }
+        else if(LOWERCASE_CHECK) {
+            indicator = "Weak";
+            message = "For better security, use uppercase (A-Z), digits (0-9), special characters (!@#$%^&* etc,.)";
+            text_color = '#dc2626';
+        }
+    }
+
+    // Returning indicator message
+    return {'indicator': indicator, 'message': message, 'text_color': text_color};
+}
+
+// Password check for account creation page
+if (document.getElementById('id_password1')){
+    let password_field = document.getElementById('id_password1');
+    let password_text_display = document.querySelector('.password-strength');
+
+    password_field.addEventListener('input', (e) => {
+        result = passwordStrength(e.target.value);
+        if(result !== null) {
+            // changing the color based on indicator text
+            password_text_display.style.color = result.text_color;
+            
+            let text = `<i class='bx bxs-lock-alt text-xl'></i> <b>${result.indicator}</b> - ${result.message}`;
+            password_text_display.innerHTML = text;
+        }
+    });
+}
+
+// Password check for Logged user
+if (document.getElementById('id_new_password1')){
+    let password_field = document.getElementById('id_new_password1');
+    let password_text_display = document.querySelector('.password-strength');
+
+    password_field.addEventListener('input', (e) => {
+        result = passwordStrength(e.target.value);
+        if(result !== null) {
+            // changing the color based on indicator text
+            password_text_display.style.color = result.text_color;
+
+            let text = `<i class='bx bxs-lock-alt text-xl'></i> <b>${result.indicator}</b> - ${result.message}`;
+            password_text_display.innerHTML = text;
+        }
+    });
+}
+
+// Show & hide password
+if(document.querySelector(".show-password")) {
+    let passwords = document.querySelectorAll(".show-password");
+
+    passwords.forEach(password => {
+        password.addEventListener('click', (e) => {
+
+            let show_password = e.target;
+            if(show_password.classList.contains('fa-eye-slash')) {
+                show_password.parentElement.children[0].type = 'text';
+                show_password.classList.add('fa-eye');
+                show_password.classList.remove('fa-eye-slash');
+            }
+            else if(show_password.classList.contains('fa-eye')) {
+                show_password.parentElement.children[0].type = 'password';
+                show_password.classList.add('fa-eye-slash');
+                show_password.classList.remove('fa-eye');
+            }
+        })
+    }); 
+}
+
+/*** End Password strength checker ***/
