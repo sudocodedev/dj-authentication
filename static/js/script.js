@@ -1,12 +1,12 @@
-let message_status = document.querySelector(".status");
 let toast_notification = document.getElementById("messages");
+const WAITING_TIME = 2500;
 
 let signup_email="undone";
 let signup_sms="undone";
 
 let polling;
 
-let options = {childList: true};
+let options = { childList: true, subtree: true };
 
 function NotificationStatus(url) {
     fetch(url)
@@ -14,19 +14,21 @@ function NotificationStatus(url) {
     .then(data => {
         console.log(data);
         if(data.status !== 'NA'){
-            message_status.innerHTML += `
-                <div class="alert alert-${data.type} items-center flex-shrink-0 notification w-fit ms-auto">
+            toast_notification.insertAdjacentHTML(
+                'afterbegin',
+                `<div class="alert alert-${data.type} items-center flex-shrink-0 notification w-fit ms-auto status-notification">
                     <span>${data.message}</span>
                     <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
-                </div>
-            `
+                </div>`        
+            );
             if (data.status === 'success' && data.action === "forgot-pwd"){
-                message_status.innerHTML += `
-                    <div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto">
+                toast_notification.insertAdjacentHTML(
+                    'afterbegin',
+                    `<div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto status-notification">
                         <span>you can close this window</span>
                         <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
-                    </div>
-                `
+                    </div>`
+                );
             }
             if(data.status !== 'pending'){
                 clearInterval(polling);
@@ -38,19 +40,21 @@ function NotificationStatus(url) {
 }
 
 function DisplayStatus(content) {
-    message_status.innerHTML += `
-        <div class="alert alert-${content.type} items-center flex-shrink-0 notification w-fit ms-auto">
+    toast_notification.insertAdjacentHTML(
+        'afterbegin',
+        `<div class="alert alert-${content.type} items-center flex-shrink-0 notification w-fit ms-auto status-notification">
             <span>${content.message}</span>
             <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
-        </div>
-    `
+        </div>`        
+    );
     if (content.action === 'signup-sms' && content.status === 'success' ){
-        message_status.innerHTML += `
-            <div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto">
+        toast_notification.insertAdjacentHTML(
+            'afterbegin',
+            `<div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto status-notification">
                 <span>you can close this window</span>
                 <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
-            </div>
-        `
+            </div>`
+        );
     }
     if(content.status !== 'pending'){
         
@@ -94,17 +98,18 @@ function SignUpNotificationStatus(url) {
 function detectNotifications(mutations) {
     for (let mutation of mutations) {
         if(mutation.type === 'childList') {
-            console.log("A child node has been added or removed.");
+            console.log("going to remove notifications");
+            let notifications = document.querySelectorAll('.status-notification');
+            notifications.forEach(notification => {
+                setTimeout(() => {
+                    notification.remove();
+                }, WAITING_TIME);
+            });
+
         }
     }
 }
 
-function clearNotification(){
-    let notification = document.querySelector('.notification');
-    setTimeout(()=>{
-        notification.style.display = 'none';
-    }, 2000);
-}
 
 function imageUpload(event, imgID){
     const file = event.target.files[0];
@@ -156,17 +161,16 @@ if(document.getElementById('resend-userid') && document.getElementById('resend-u
 
 
 // Removing toast notifications
-// toast_notification.addEventListener('click', (e) => {
-//     if(e.target.className.includes('dismiss')){
-//         let notification = e.target.parentElement;
-//         toast_notification.removeChild(notification);
-//     }
-// });
+toast_notification.addEventListener('click', (e) => {
+    if(e.target.className.includes('dismiss')){
+        let notification = e.target.parentElement;
+        toast_notification.removeChild(notification);
+    }
+});
 
-// observer = new MutationObserver(detectNotifications);
+observer = new MutationObserver(detectNotifications);
 
-// observer.observe(toast_notification, options);
-
+observer.observe(toast_notification, options);
 
 // Profile picture
 if(document.getElementById('id_avatar')){
@@ -213,14 +217,6 @@ function passwordStrength(password) {
         UPPERCASE_CHECK = PATTERNS[1].test(password);
         DIGIT_CHECK = PATTERNS[2].test(password);
         SPECIAL_CHARACTERS_CHECK = PATTERNS[3].test(password);
-
-        
-        // console.log(
-        //     'l -> ', LOWERCASE_CHECK, 
-        //     'u -> ', UPPERCASE_CHECK, 
-        //     'd -> ', DIGIT_CHECK, 
-        //     's -> ', SPECIAL_CHARACTERS_CHECK
-        // );
 
         // determing password strength indicator
         if(LOWERCASE_CHECK && UPPERCASE_CHECK && DIGIT_CHECK && SPECIAL_CHARACTERS_CHECK) {
@@ -306,3 +302,13 @@ if(document.querySelector(".show-password")) {
 }
 
 /*** End Password strength checker ***/
+
+// clearing notifications
+if(document.querySelector('.toast-notification-message')) {
+    let notifications = document.querySelectorAll('.toast-notification-message');
+    notifications.forEach(notification => {
+        setTimeout(()=>{
+            notification.remove();
+        }, WAITING_TIME);    
+    });
+}

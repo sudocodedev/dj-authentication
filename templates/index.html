@@ -12,28 +12,14 @@
 </head>
 <body>
     <div id="messages" class="toast toast-top toast-end z-10">
-        <!-- <div class="alert alert-info items-center flex-shrink-0 notification w-fit ms-auto">
-        <span>New mail arrived.</span>
-        <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
-        </div>
-        <div class="alert alert-success items-center flex-shrink-0 notification w-fit ms-auto">
-        <span>Message sent successfully.</span>
-        <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
-        </div>
-        <div class="alert alert-error items-center flex-shrink-0 notification w-fit ms-auto">
-          <span>Message sent successfully.Message sent successfully.Message sent successfully.</span>
-          <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
-        </div> -->
-
         {% if messages %}
           {% for message in messages %}
-          <div class="alert {{ message.tags }} items-center flex-shrink-0 notification w-fit ms-auto">
+          <div class="alert {{ message.tags }} items-center flex-shrink-0 notification w-fit ms-auto toast-notification-message">
             <span>{{ message }}</span>
             <i class='bx bx-x dismiss text-2xl cursor-pointer hover:scale-125'></i>
           </div>
           {% endfor %}
         {% endif %}
-        <div class="status"></div>
     </div>
     
     <div id="main" class="main flex flex-col min-h-screen">
