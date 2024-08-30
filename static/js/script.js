@@ -1,5 +1,6 @@
 let toast_notification = document.getElementById("messages");
 const WAITING_TIME = 2500;
+const THEME = ['emerald', 'dim'];
 
 let signup_email="undone";
 let signup_sms="undone";
@@ -7,6 +8,40 @@ let signup_sms="undone";
 let polling;
 
 let options = { childList: true, subtree: true };
+
+
+/*** Theme control ***/
+if(!("theme" in localStorage)) {
+    localStorage.setItem('theme', 'emerald');
+}
+
+let site = document.querySelector('html');
+let theme_switch = document.getElementById('theme-toggle');
+
+// Applying default theme from localStorage 
+if(localStorage.getItem('theme') === 'emerald' ) {
+    site.dataset.theme = localStorage.getItem('theme');
+    theme_switch.checked = false;
+} else {
+    site.dataset.theme = localStorage.getItem('theme');
+    theme_switch.checked = true;
+}
+
+theme_switch.addEventListener('change', (e) => {
+    // Dark Theme
+    if(e.target.checked) {
+        localStorage.setItem('theme', 'dim');
+        site.dataset.theme = localStorage.getItem('theme');
+    } 
+    // Light Theme
+    else {
+        localStorage.setItem('theme', 'emerald');
+        site.dataset.theme = localStorage.getItem('theme');
+    }
+});
+
+/*** End Theme control ***/
+
 
 function NotificationStatus(url) {
     fetch(url)
