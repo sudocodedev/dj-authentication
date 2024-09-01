@@ -33,7 +33,7 @@
                 <div class="profile-pic-container w-[25%] h-[25%] mx-auto">
                     {{ form.avatar|add_class:"hidden" }}
                     <label for="id_avatar" class="avatar-pic h-full w-full cursor-pointer">
-                        {% if account.avatar.url %}
+                        {% if account.avatar and account.avatar.url %}
                             <img id="avatar-pic-overview" src="{{ account.avatar.url }}" alt="your avatar" class="rounded-full h-full w-full border-2 ring-2 ring-offset-2 hover:ring-slate-500 focus:ring-slate-500">
                         {% else %}
                             <img id="avatar-pic-overview" src="{% static 'assets/user.png' %}" alt="your avatar" class="rounded-full h-full w-full border-2 ring-2 ring-offset-2 hover:ring-slate-500 focus:ring-slate-500">
@@ -207,7 +207,7 @@
                     </span>
                     {% if form.password2.errors %}
                         {% for error in form.password2.errors %}
-                            <p class="text-xs font-medium">{{ error }}</p>
+                            <p class="text-xs text-red-600 font-medium">{{ error }}</p>
                         {% endfor %}
                     {% endif %}
                 </div>

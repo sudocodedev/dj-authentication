@@ -20,16 +20,16 @@
         <div class="flex flex-col items-center px-10 py-8 gap-3">
             <p class="font-semibold tracking-widest p-2 text-4xl text-slate-950 text-center -mt-5 mb-3">Profile</p>
             <div class="flex flex-col items-center justify-center gap-2">
-                {% if account.avatar.url %}
+                {% if account.avatar and account.avatar.url %}
                     <img class="rounded-full ring ring-offset-2 ring-blue-300 hover:ring-blue-500 focus:ring-blue-500 ring-offset-slate-300" height="150px" width="150px" src="{{ account.avatar.url }}" alt="profile-pic">
                 {% else %}
-                <img class="rounded-full ring ring-offset-2 ring-blue-300 hover:ring-blue-500 focus:ring-blue-500 ring-offset-slate-300" height="150px" width="150px" src="{% static 'assets/user.png' %}" alt="profile-pic">
+                    <img class="rounded-full ring ring-offset-2 ring-blue-300 hover:ring-blue-500 focus:ring-blue-500 ring-offset-slate-300" height="150px" width="150px" src="{% static 'assets/user.png' %}" alt="profile-pic">
                 {% endif %}
 
 
                 
                 <p class="font-medium italic text-slate-900 hover:text-slate-800 cursor-pointer tracking-wider">
-                    {% if account.avatar.url %}
+                    {% if account.avatar and account.avatar.url %}
                         @{{ account.username }}
                     {% else %}
                         -

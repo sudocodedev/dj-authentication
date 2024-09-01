@@ -1,14 +1,13 @@
 {% extends 'index.html' %}
 
 {% block content %}
-<h1>Welcome to DJ Auth</h1>
-    <i class='bx bx-user'></i>
-    <i class='bx bxs-user'></i>
-    <i class='bx bxl-facebook-square'></i>
-    {% if request.user.is_authenticated %} 
-        <p>Logged in User: <b>{{ request.user }}</b></p>
-        <p>view ur profile here -- <a href="{% url 'account-view-page' request.user.id %}">⚙</a></p>
-    {% else %} 
-        <p>Logged in User: <b>No One</b></p>
+    <div class="mt-10 text-5xl font-extrabold ...">
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">
+            Welcome to DJ CRUD
+        </span>
+        <span class="text-5xl animate-ping ml-1">👋</span>
+    </div>
+    {% if not request.user.is_authenticated %}  
+        <a href="{% url 'signup-page' %}" role="button" class="mt-10 btn btn-lg rounded-full px-5 py-1 font-bold bg-amber-400 text-slate-900">Let's get started 🚀</a>
     {% endif %}
 {% endblock %}

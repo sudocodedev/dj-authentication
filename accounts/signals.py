@@ -35,13 +35,11 @@ def user_handler(sender, instance, created, *args, **kwargs):
             'domain': get_current_site(request).domain,
         }
 
-        print(data)
+        send_email_otp = Thread(target=helper.send_otp_mail, kwargs=data)
+        send_phone_otp = Thread(target=helper.send_otp_phone, kwargs=data)
 
-        # send_email_otp = Thread(target=helper.send_otp_mail, kwargs=data)
-        # send_phone_otp = Thread(target=helper.send_otp_phone, kwargs=data)
-
-        # send_email_otp.start()
-        # send_phone_otp.start()
+        send_email_otp.start()
+        send_phone_otp.start()
     
 
 

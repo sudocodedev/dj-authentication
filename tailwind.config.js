@@ -11,6 +11,9 @@ module.exports = {
         'xs': '0.8rem',
         '2xs': '0.5rem',
       },
+      fontFamily: {
+        'jost': ['Jost', 'sans-serif'],
+      },
     },
   },
   plugins: [
@@ -20,5 +23,16 @@ module.exports = {
   daisyui: {
     themes: ["emerald", "dim"],
   },
+  safelist: [
+    'toast',
+    'toast-top',
+    'toast-end',
+    'alert',
+    'alert-info',
+    'alert-success',
+    'alert-warning',
+    'alert-error',
+    'text-xl',
+  ],
 }
 

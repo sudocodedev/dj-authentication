@@ -1,5 +1,5 @@
 let toast_notification = document.getElementById("messages");
-const WAITING_TIME = 2500;
+const WAITING_TIME = 4500;
 const THEME = ['emerald', 'dim'];
 
 let signup_email="undone";

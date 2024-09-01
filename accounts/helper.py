@@ -14,9 +14,8 @@ def login_sms_otp(**kwargs):
                                                action="signin-sms",
                                                message_type='info',
                                                status='pending',
-                                               message="You will receive an SMS shortly if mobile no. is valid")
+                                               message= _("<i class='bx bx-info-square text-xl'></i> You will receive an SMS shortly if mobile no. is valid"))
     phone_number = kwargs.get('phonenumber')
-    print(phone_number)
     
     try:
         body = f"""
@@ -42,34 +41,29 @@ def login_sms_otp(**kwargs):
         r = requests.post(url=os.environ.get("SMS_CHEF_URL"), params=message)
 
         if r.status_code == 200: 
-            print(r.status_code, "request was successfull!")
-            print("hello")
             notification.status = 'success'
             notification.message_type = 'success'
-            notification.message = _(f"SMS sent to your mobile {phone_number} with login OTP")
+            notification.message = _(f"<i class='bx bx-check-circle text-xl'></i> SMS sent to your mobile {phone_number} with login OTP")
         else:
             notification.status = 'failed'
             notification.message_type = 'error'
-            notification.message = _(f"Problem in sending SMS to {phone_number}")
+            notification.message = _(f"<i class='bx bx-error-circle text-xl'></i> Problem in sending SMS to {phone_number}")
     except Exception as e:
         notification.status = 'failed'
         notification.message_type = 'error'
-        notification.message = _("There is a server issue in sending SMS, Please try after sometime")
+        notification.message = _("<i class='bx bx-error-circle text-xl'></i> There is a server issue in sending SMS, Please try after sometime")
     
     notification.save()
 
 def send_otp_phone(**kwargs):
-
-    print("inside send otp function")
     user = kwargs.get('user')
     phone_number = user.phonenumber.as_e164
-    print(phone_number)
 
     notification = Notification.objects.create(user=user,
                                                action='signup-sms',
                                                message_type='info',
                                                status='pending',
-                                               message=_("You will receive an SMS shortly if mobile no. is valid")
+                                               message=_("<i class='bx bx-info-square text-xl'></i> You will receive an SMS shortly if mobile no. is valid")
                                                )
 
     try:
@@ -101,27 +95,21 @@ def send_otp_phone(**kwargs):
             "message": body,
         }
 
-        print("created message")
-
         r = requests.post(url=os.environ.get("SMS_CHEF_URL"), params=message)
 
-        print("made request")
-
         if r.status_code == 200: 
-            print(r.status_code, "request was successfull!")
-            print("hello")
             notification.status = 'success'
             notification.message_type = 'success'
-            notification.message = _(f"Account Verification SMS sent successfully to {phone_number}")
+            notification.message = _(f"<i class='bx bx-check-circle text-xl'></i> Account Verification SMS sent successfully to {phone_number}")
         else:
             notification.status = 'failed'
             notification.message_type = 'error'
-            notification.message = _(f"Problem in sending SMS to {phone_number}")
+            notification.message = _(f"<i class='bx bx-error-circle text-xl'></i> Problem in sending SMS to {phone_number}")
 
     except Exception as e:
         notification.status = 'failed'
         notification.message_type = 'error'
-        notification.message = _("There is a server issue in sending SMS, Please try after sometime")
+        notification.message = _("<i class='bx bx-error-circle text-xl'></i> There is a server issue in sending SMS, Please try after sometime")
 
     notification.save()
 
@@ -131,7 +119,7 @@ def send_otp_mail(**kwargs):
                                                action='signup-email',
                                                message_type='info',
                                                status='pending',
-                                               message=_("You will receive an email shortly if the address is valid"))
+                                               message=_("<i class='bx bx-info-square text-xl'></i> You will receive an email shortly if the address is valid"))
 
     data = {
         "user": kwargs.get('user').username,
@@ -162,15 +150,15 @@ def send_otp_mail(**kwargs):
         if email_status:
             notification.status = 'success'
             notification.message_type = 'success'
-            notification.message = _(f"Account Verification mail successfully sent to {data.get('email')}")
+            notification.message = _(f"<i class='bx bx-check-circle text-xl'></i> Account Verification mail successfully sent to {data.get('email')}")
         else:
             notification.status = 'failed'
             notification.message_type = 'error'
-            notification.message = _(f"Problem in sending mail to {data.get('email')}, Double check once!")
+            notification.message = _(f"<i class='bx bx-error-circle text-xl'></i> Problem in sending mail to {data.get('email')}, Double check once!")
     except Exception as e:
         notification.status = 'failed'
         notification.message_type = 'error'
-        notification.message = _("There is a server issue in sending mail, Please try after sometime")
+        notification.message = _("<i class='bx bx-error-circle text-xl'></i> There is a server issue in sending mail, Please try after sometime")
     
     notification.save()
 
@@ -210,16 +198,16 @@ def send_password_reset(**kwargs):
         if email_status:
             notification.status = 'success'
             notification.message_type = 'success'
-            notification.message = _(f"Password reset mail sent successfully to {data.get('email')}")
+            notification.message = _(f"<i class='bx bx-check-circle text-xl'></i> Password reset mail sent successfully to {data.get('email')}")
         else:
             notification.status = 'failed'
             notification.message_type = 'error'
-            notification.message = _(f"Problem in sending mail to {data.get('email')}")
+            notification.message = _(f"<i class='bx bx-error-circle text-xl'></i> Problem in sending mail to {data.get('email')}")
     
     except Exception as e:
         notification.status = 'failed'
         notification.message_type = 'error'
-        notification.message = _("There was a server issue, Please try after sometime")
+        notification.message = _("<i class='bx bx-error-circle text-xl'></i> There was a server issue, Please try after sometime")
 
     notification.save()
     

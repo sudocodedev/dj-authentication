@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.forms import SetPasswordForm
 from .forms import AccountCreationForm, AccountLoginForm, AccountEditForm, AccountPwdResetForm
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth import get_user_model
+from django.contrib.auth import login, logout, authenticate, get_user_model
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.encoding import force_str, force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -24,28 +24,20 @@ User = get_user_model() # custom user model
 ######################## LOGIN ########################
 
 def user_signin(request):
-    print("inside login view")
     if request.method == 'POST':
-        print("inside post req")
         form = AccountLoginForm(request, data=request.POST)
         if form.is_valid():
-            print("inside form validation")
             email = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
             user = authenticate(request, username=email, password=password)
-
-            print("authentication -->", user)
-
             # if user:
-            print("user has been authenticated")
             if User.objects.get(email=email).login_sms_otp:
-                print("You are not supposed to be in this block")
                 # Enabled Login OTP via SMS
                 account = User.objects.get(email=email)
                 otp = OTP.objects.create(
                                             user=account, 
-                                            token=secrets.randbits(16),
+                                            token=secrets.randbelow(90000) + 10000,
                                             otp_expires_at = timezone.now() + timezone.timedelta(minutes=5)
                                         )
                 # fetching User data
@@ -55,21 +47,17 @@ def user_signin(request):
                     'otp': otp.token,
                     'user': account,
                 }
-                print(data)
                 # Sending OTP
                 send_login_otp = Thread(target=helper.login_sms_otp, kwargs=data)
                 send_login_otp.start()
-                # messages.info(request, _(f"SMS sent to your mobile {data.get('phonenumber')} with OTP"))
                 return redirect("verify-login-otp", uid)
             else:
                 # Default Login
-                print("normal login")
                 login(request, user)
-                messages.success(request, _("User logged in"))
+                messages.success(request, _("<i class='bx bx-check-circle text-xl'></i> User logged in"))
                 return redirect('home-page')
         else:
-            print("I'm here in last error part")
-            messages.error(request, _("user credentials are not correct"))
+            messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> user credentials are not correct"))
             return render(request, 'accounts/authentication-page.html', { 'form': form, 'action': 'sigin' })
     else:
         form = AccountLoginForm()
@@ -87,13 +75,13 @@ def verify_login_otp(request, uidb64):
         if request.POST.get('otp_code') == db_otp.token:
             if db_otp.otp_expires_at > timezone.now():
                 login(request, user, backend='accounts.backend.AuthAccountBackend')
-                messages.success(request, _("User logged in"))
+                messages.success(request, _("<i class='bx bx-check-circle text-xl'></i> User logged in"))
                 return redirect('home-page')
             else:
-                messages.error(request, _("OTP got expired, Get a new one"))
+                messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> OTP got expired, Get a new one"))
                 return redirect("verify-login-otp", uidb64)
         else:
-            messages.error(request, _("Invalid OTP, Enter a valid one"))
+            messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> Invalid OTP, Enter a valid one"))
             return redirect("verify-login-otp", uidb64)
     
     return render(request, 'accounts/verify_account.html', {'action': 'login', 'id': uidb64, 'user_id': uid, 'sitekey': settings.RECAPTCHA_PUBLIC_KEY})
@@ -118,7 +106,7 @@ def resend_login_sms_otp(request, uidb64):
     account = User.objects.get(id=uid)
     otp = OTP.objects.create(
                                 user=account, 
-                                token=secrets.randbits(16),
+                                token=secrets.randbelow(90000) + 10000,
                                 otp_expires_at = timezone.now() + timezone.timedelta(minutes=5)
                             )
     # fetching User data                
@@ -135,7 +123,7 @@ def resend_login_sms_otp(request, uidb64):
 
 def user_signout(request):
     logout(request)
-    messages.info(request, _("User logged out"))
+    messages.info(request, _("<i class='bx bx-info-square text-xl'></i> User logged out"))
     return redirect('home-page')
 
 
@@ -151,11 +139,10 @@ def user_signup(request):
             user = form.save(commit=False)
             user.is_active = False
             user.save()
-            print(user.id)
-            messages.info(request, _("Account Verification process initiated"))
+            messages.info(request, _("<i class='bx bx-info-square text-xl'></i> Account Verification process initiated"))
             return render(request, 'accounts/accounts.html', {'form': form, 'user_id': user.id})
         else:
-            messages.error(request, _("Kindly check below errors"))
+            messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> Kindly check below errors"))
     else:
         form = AccountCreationForm()
     context = {'form': form}
@@ -173,16 +160,16 @@ def verify_account(request, uidb64):
             if db_otp.otp_expires_at > timezone.now():
                 user.is_active = True
                 user.save()
-                messages.success(request, _("Your account has been verified successfully, Redirecting to Login page"))
+                messages.success(request, _("<i class='bx bx-check-circle text-xl'></i> Your account has been verified successfully, Redirecting to Login page"))
                 return redirect('signin-page')
             else:
-                messages.error(request, _("OTP got expired, get a new OTP"))
+                messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> OTP got expired, get a new OTP"))
                 return redirect("verify-account", uidb64)
         else:
-            messages.error(request, _("Invalid OTP has been entered, enter valid OTP"))
+            messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> Invalid OTP has been entered, enter valid OTP"))
             return redirect("verify-account", uidb64)
     
-    return render(request, 'accounts/verify_account.html')
+    return render(request, 'accounts/verify_account.html', {'sitekey': settings.RECAPTCHA_PUBLIC_KEY})
 
 
 def signup_status(request, userID):
@@ -213,7 +200,7 @@ def resend_otp(request):
         try:
             user = User.objects.get(email=email, phonenumber=phonenumber)
         except User.DoesNotExist:
-            messages.error(request, _("Entered details didn't match with DB, Enter a valid one"))
+            messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> Entered details didn't match with DB, Enter a valid one"))
             return redirect('resend-otp')
         
         # Generating a new OTP
@@ -227,14 +214,13 @@ def resend_otp(request):
             'domain': get_current_site(request).domain,
         }
 
-        print(data['user'].email, data['user'].phonenumber)
         send_email_otp = Thread(target = helper.send_otp_mail, kwargs=data)
         send_sms_otp = Thread(target = helper.send_otp_phone, kwargs=data)
 
         send_email_otp.start()
         send_sms_otp.start()
 
-        messages.info(request, _("Account Verification process re-initiated"))
+        messages.info(request, _("<i class='bx bx-info-square text-xl'></i> Account Verification process re-initiated"))
         return render(request, 'accounts/verify_account.html', {'action': 'resend', 'user_id': user.id, 'sitekey': settings.RECAPTCHA_PUBLIC_KEY})
 
     context={'action': 'resend', 'sitekey': settings.RECAPTCHA_PUBLIC_KEY}
@@ -266,7 +252,7 @@ def password_reset(request):
             reset_email = Thread(target=helper.send_password_reset, kwargs=data)
             reset_email.start()
 
-            messages.info(request, _("Password Reset process initiated"))
+            messages.info(request, _("<i class='bx bx-info-square text-xl'></i> Password Reset process initiated"))
             return render(request, 'accounts/authentication-page.html', {'form': form, 'action': 'forgot', 'user_id': user_id})
         else:
             # for rendering form field errors
@@ -307,18 +293,18 @@ def password_reset_request(request, uidb64, token):
                 form.save()
                 user.refresh_from_db()
                 user.save()
-                messages.success(request, _("New password has been set successfully, You can login now"))
+                messages.success(request, _("<i class='bx bx-check-circle text-xl'></i> New password has been set successfully, You can login now"))
                 return redirect('signin-page')
             else:
                 for error in list(form.errors.values()):
-                    messages.error(request, error)
+                    messages.error(request, f"<i class='bx bx-error-circle text-xl'></i> {error}")
     
         form = SetPasswordForm(user)
         context = {'action': "setpwd",'form': form, 'sitekey': settings.RECAPTCHA_PUBLIC_KEY}
         return render(request, 'accounts/authentication-page.html', context)
     
     else:
-        messages.error(request, _("Password Reset verification link has been expired, redirecting to Password Reset page"))
+        messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> Password Reset verification link has been expired, redirecting to Password Reset page"))
         return redirect('password-reset')
 
 ######################## END FORGOT Password ########################
@@ -326,19 +312,20 @@ def password_reset_request(request, uidb64, token):
 
 ######################## User Reset Password ########################
 
+@login_required(login_url='signin-page')
 def account_reset_password(request, accountID):
     user = User.objects.get(id=accountID)
     if request.method == "POST":
         form = SetPasswordForm(user, request.POST)
         if form.is_valid():
             if user.check_password(request.POST.get('new_password1')):
-                messages.error(request, _("New Password cannot be same as old password"))
+                messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> New Password cannot be same as old password"))
                 return redirect('account-reset-password', user.id)
 
             form.save()
             user.refresh_from_db()
             user.save()
-            messages.success(request, _('Password changed successfully!'))
+            messages.success(request, _("<i class='bx bx-check-circle text-xl'></i> Password changed successfully!"))
             return redirect('account-view-page',user.id)
         
     form = SetPasswordForm(user)
@@ -349,22 +336,23 @@ def account_reset_password(request, accountID):
 ######################## END User Reset Password ########################
 
 
-######################## PROFILE ########################
+######################## PROFILE CRUD ########################
 
+@login_required(login_url='signin-page')
 def account_view(request, accountID):
     try:
         account = User.objects.get(id=accountID)
     except User.DoesNotExist:
-        messages.error(request, _("User doesn't exist, redirecting to home page"))
+        messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> User doesn't exist, redirecting to home page"))
         return redirect('home-page')
     return render(request, 'accounts/view-account.html', {'account':account})         
 
-
+@login_required(login_url='signin-page')
 def account_edit(request, accountID):
     try:
         account = User.objects.get(id=accountID)
     except User.DoesNotExist:
-        messages.error(request, _("User doesn't exist, redirecting to home page"))
+        messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> User doesn't exist, redirecting to home page"))
         return redirect('home-page')
     
     if request.method == 'POST':
@@ -374,23 +362,23 @@ def account_edit(request, accountID):
             user = form.save(commit=False)
             user.email = form.cleaned_data.get('email').lower()
             user.save()
-            messages.success(request, _("Account updated successfully"))
+            messages.success(request, _("<i class='bx bx-check-circle text-xl'></i> Account updated successfully"))
             return redirect('home-page')
         else:
-            messages.error(request, _("Kindly check below errors"))
+            messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> Kindly check below errors"))
     else:
         form = AccountEditForm(instance=request.user)
 
     context = {'form': form, 'action': 'edit', 'account': account}
     return render(request, 'accounts/accounts.html', context)
 
-
+@login_required(login_url='signin-page')
 def account_delete(request, accountID):
     try:
         account = User.objects.get(id=accountID)
         account.delete()
     except User.DoesNotExist:
-        messages.error(request, _("User doesn't exist, redirecting to home page"))
+        messages.error(request, _("<i class='bx bx-error-circle text-xl'></i> User doesn't exist, redirecting to home page"))
 
     return redirect('home-page')
     
