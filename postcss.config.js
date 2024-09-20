@@ -2,6 +2,6 @@ module.exports = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
-    // cssnano: {preset: 'default',} // Minify CSS
+    cssnano: {preset: 'default',} // Minify CSS
   },
 }
