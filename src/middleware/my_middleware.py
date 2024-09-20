@@ -1,5 +1,5 @@
 from threading import local
-from src.log_config import logger
+# from src.log_config import logger
 
 # a dictionary for storing incoming request
 cache_request = local()
@@ -39,10 +39,10 @@ class CountReqExcMiddleware:
 
     def __call__(self, request):
         self.request_count += 1
-        logger.info(f"{self.request_count} requests received so far")
+        # logger.info(f"{self.request_count} requests received so far")
         response = self.get_response(request)
         return response
 
     def process_exception(self, request, exception):
         self.exeception_count += 1
-        logger.error(f"{self.exeception_count} exceptions encountered so far")
+        # logger.error(f"{self.exeception_count} exceptions encountered so far")
