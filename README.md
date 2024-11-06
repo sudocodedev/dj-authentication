@@ -1,6 +1,3 @@
-Here’s a detailed structure and content suggestion for your GitHub README file that will showcase your authentication system project effectively:
-
----
 # DJ Auth
 ### (Django Authentication System with Two-Factor Authentication and Social Login)
 
@@ -164,11 +161,3 @@ Open your browser and visit `http://127.0.0.1:8000/` to explore the authenticati
 
 ![Profile Settings](screenshots/profile_management.png)
 *Profile management with 2FA option.*
-
-## 📄 License
-
-This project is [MIT](LICENSE) licensed.
-
----
-
-Feel free to tweak the content as needed and add more details specific to your implementation. This README provides a comprehensive overview of the project for potential users or employers checking out your GitHub profile.
